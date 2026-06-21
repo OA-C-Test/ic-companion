@@ -1,0 +1,1003 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="format-detection" content="telephone=no">
+<title>Interstitial Cystitis Companion</title>
+<style>
+  :root {
+    --teal:#2f7d57; --teal-bg:#eaf5ee; --plum:#b35c46; --plum-bg:#fbeee9;
+    --line:#d8e0dc; --ink:#2c3a31; --muted:#5f6f64;
+  }
+  * { box-sizing: border-box; -webkit-text-size-adjust: 100%; }
+  html,body { margin:0; padding:0; background:#eef3ec; color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; line-height:1.6; }
+  .wrap { max-width:640px; margin:0 auto; padding:16px 16px 44px; }
+
+  /* top bar: home link + step caption */
+  .topbar { display:flex; align-items:center; justify-content:space-between; gap:10px; min-height:26px; margin:2px 0 16px; }
+  .homelink { background:none; border:none; color:var(--teal); font-weight:600; font-size:14.5px; padding:6px 2px; cursor:pointer; }
+  .homelink:disabled { visibility:hidden; }
+  .stepcaption { text-align:right; font-size:12.5px; font-weight:600; color:var(--teal); letter-spacing:.01em; }
+
+  .page { display:none; }
+  .page.active { display:block; }
+  h1 { font-size:23px; color:var(--teal); margin:2px 0 4px; line-height:1.22; }
+  .lede { font-size:14.5px; color:var(--muted); margin:0 0 16px; }
+  h2.block { font-size:16px; color:var(--ink); margin:20px 0 7px; }
+  h2.section { font-size:12.5px; letter-spacing:.06em; text-transform:uppercase; color:var(--teal);
+    border-bottom:2px solid #cfe6d8; padding-bottom:5px; margin:26px 0 12px; }
+  p { margin:0 0 12px; font-size:15.5px; }
+  .card { background:#fff; border:1px solid var(--line); border-radius:12px; padding:14px 16px; margin:0 0 14px; }
+  .card.teal { background:var(--teal-bg); border-color:#c4e2cf; }
+  .card.plum { background:var(--plum-bg); border-color:#f0d3c8; }
+  .card h3 { margin:0 0 6px; font-size:15px; color:var(--teal); }
+  .card.plum h3 { color:var(--plum); }
+  ul.tips { margin:6px 0 2px; padding-left:20px; }
+  ul.tips li { margin-bottom:6px; font-size:15px; }
+  ol.steps-list { margin:8px 0 0; padding-left:22px; }
+  ol.steps-list li { margin-bottom:9px; font-size:15px; line-height:1.5; }
+  .ex { background:#fff; border:1px dashed #c4d8cc; border-radius:9px; padding:9px 12px; margin:5px 0; font-size:14.5px; color:#37474f; font-style:italic; }
+  .note { font-size:13px; color:var(--muted); }
+  .savenote { font-size:12.5px; color:var(--teal); font-weight:600; margin-top:8px; min-height:16px; }
+
+  .navrow { display:flex; gap:10px; margin-top:20px; }
+  .btn { display:block; width:100%; font-size:17px; font-weight:600; padding:15px; border-radius:12px; border:none; margin-top:10px; cursor:pointer; }
+  .navrow .btn { margin-top:0; }
+  .btn-primary { background:var(--teal); color:#fff; }
+  .btn-plum { background:var(--plum); color:#fff; }
+  .btn-line { background:#fff; color:var(--teal); border:1.5px solid var(--teal); }
+  .btn-soft { background:#eef1ee; color:#8a968c; border:1.5px solid #e0e6e1; cursor:default; }
+  .btn-reset { background:#fff; color:#b0493e; border:1.5px solid #e6c2bb; }
+  .btn-ghost { background:transparent; color:var(--muted); border:none; text-decoration:underline; font-size:14px; font-weight:500; padding:10px; }
+  .grow { flex:1; }
+
+  /* ---------- landing / hub ---------- */
+  .hub-head h1 { font-size:25px; margin-bottom:6px; }
+  .hub-intro { font-size:15px; color:var(--ink); margin:0 0 6px; }
+  .hubnote { font-size:13.5px; color:var(--plum); background:var(--plum-bg); border:1px solid #f0d3c8;
+    border-radius:10px; padding:10px 13px; margin:12px 0 4px; display:none; }
+  .cards { display:flex; flex-direction:column; gap:12px; margin:16px 0 8px; }
+  .qcard { display:flex; gap:14px; align-items:flex-start; background:#fff; border:1.5px solid var(--line);
+    border-radius:16px; padding:15px 16px; transition:border-color .15s, box-shadow .15s; }
+  .qcard.ready { cursor:pointer; }
+  .qcard.ready:hover { border-color:var(--teal); box-shadow:0 2px 12px rgba(47,125,87,.08); }
+  .qcard.soon { opacity:.82; }
+  .badge { flex:0 0 auto; width:46px; height:46px; border-radius:13px; display:flex; align-items:center; justify-content:center; }
+  .badge svg { width:24px; height:24px; }
+  .qc-body { flex:1; min-width:0; }
+  .qc-top { display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:3px; }
+  .qc-top h3 { margin:0; font-size:16.5px; color:var(--ink); }
+  .qcard p { font-size:14px; color:var(--muted); margin:2px 0 0; line-height:1.45; }
+  .qcard p.mins { color:var(--teal); font-weight:600; font-size:12.5px; margin-top:6px; }
+  .pill { font-size:11px; font-weight:700; letter-spacing:.03em; text-transform:uppercase; padding:3px 9px; border-radius:999px; white-space:nowrap; }
+  .pill.ready { background:var(--teal-bg); color:var(--teal); }
+  .pill.saved { background:#fef3e2; color:#b07a12; }
+  .pill.soon { background:#eef1ee; color:#7d8a80; }
+  .qc-btn { width:auto; display:inline-block; font-size:15px; padding:10px 18px; margin-top:11px; }
+
+  /* "How it works" + summary panels */
+  .howto { background:var(--teal-bg); border:1.5px solid #c4e2cf; border-radius:14px; padding:15px 17px 13px; margin:0 0 14px; }
+  .howto h3 { margin:0 0 9px; font-size:16px; color:var(--teal); }
+  .howto ol { margin:6px 0 4px; padding-left:24px; }
+  .howto ol li { margin-bottom:9px; font-size:15.5px; line-height:1.45; }
+  .howto .tip { font-size:14px; color:var(--muted); background:#fff; border:1px solid var(--line); border-radius:10px; padding:11px 13px; margin-top:10px; line-height:1.5; }
+  .howto .tip b { color:var(--ink); }
+  .inshort { background:var(--teal-bg); border:1.5px solid #c4e2cf; border-radius:12px; padding:13px 16px; margin:0 0 16px; font-size:15.5px; line-height:1.5; }
+  .inshort b { color:var(--teal); }
+
+  /* form */
+  .q { margin-bottom:18px; }
+  .qlabel { font-size:16px; font-weight:600; margin-bottom:8px; line-height:1.35; }
+  .privtoggle { display:inline-flex; align-items:center; gap:8px; font-size:13px; color:var(--muted);
+    background:#fff; border:1.5px solid var(--line); border-radius:999px; padding:6px 13px; margin-bottom:10px; cursor:pointer; user-select:none; }
+  .privtoggle input { width:16px; height:16px; accent-color:var(--plum); margin:0; }
+  .privtoggle.on { color:var(--plum); border-color:var(--plum); background:var(--plum-bg); font-weight:600; }
+  label.option { display:flex; align-items:center; gap:11px; background:#fff; border:1.5px solid var(--line);
+    border-radius:11px; padding:13px 14px; margin-bottom:8px; font-size:16px; cursor:pointer; line-height:1.3; }
+  label.option input { width:21px; height:21px; margin:0; flex:0 0 auto; accent-color:var(--teal); }
+  label.option.selected { border-color:var(--teal); background:var(--teal-bg); font-weight:600; }
+  .textinput, .textarea, select.textinput { width:100%; font-size:16px; padding:13px 14px; border:1.5px solid var(--line);
+    border-radius:11px; background:#fff; color:var(--ink); font-family:inherit; }
+  .textarea { min-height:74px; resize:vertical; }
+  .otherinput { width:100%; font-size:16px; padding:11px 13px; border:1.5px solid var(--line); border-radius:11px; margin-top:2px; }
+
+  #results { display:none; margin-top:22px; }
+  .panel { border:1.5px solid var(--line); border-radius:14px; padding:15px; margin-top:16px; background:#fff; }
+  .panel.share { border-color:#c4e2cf; }
+  .panel.personal { border-color:#f0d3c8; background:#fdf6f2; }
+  .panel h3 { margin:0 0 5px; font-size:16px; color:var(--teal); }
+  .panel.personal h3 { color:var(--plum); }
+  .panel .pnote { font-size:12.5px; color:var(--muted); margin:0 0 10px; line-height:1.5; }
+  .panel.research { border-color:#ecd0c4; }
+  .panel.research h3 { color:var(--plum); }
+  .storebtns { display:flex; gap:9px; margin-top:10px; flex-wrap:wrap; }
+  .storebtn { flex:1; min-width:150px; text-align:center; text-decoration:none; font-size:14px; font-weight:600;
+    padding:12px 10px; border-radius:11px; background:#1d1d1f; color:#fff; }
+  .storebtn.alt { background:#0b8043; }
+  textarea.output { width:100%; min-height:200px; font-size:12.5px; font-family:ui-monospace,Menlo,Consolas,monospace;
+    padding:12px; border:1.5px solid var(--line); border-radius:11px; background:#fbfdfb; color:var(--ink); white-space:pre; }
+  .flash { text-align:center; font-size:13.5px; color:var(--teal); font-weight:600; min-height:18px; margin-top:6px; }
+  .fallback { font-size:12.5px; color:var(--muted); margin-top:14px; line-height:1.5; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <button type="button" class="homelink" id="homeLink" disabled>&lsaquo;&nbsp;All questionnaires</button>
+    <div class="stepcaption" id="stepcaption"></div>
+  </div>
+
+  <!-- ============ LANDING / HUB ============ -->
+  <section id="landing" class="page active">
+    <div class="hub-head">
+      <h1>Interstitial Cystitis Companion</h1>
+      <p class="lede">Private questionnaires to organize your bladder health &mdash; and dig deeper, at your own pace.</p>
+    </div>
+    <p class="hub-intro">Pick a questionnaire below. Each one is private, saves on your device as you go, and turns your answers into a clear summary you can keep, share with a clinician, or explore further with an AI assistant.</p>
+
+    <div class="hubnote" id="hubnote"></div>
+    <div class="cards" id="cards"></div>
+
+    <button type="button" id="hubPrivacy" class="btn btn-line">How privacy &amp; sharing works</button>
+    <p class="note" style="margin-top:14px;">This tool helps you organize information. It is <b>not a diagnosis</b> and does not replace medical care or testing.</p>
+  </section>
+
+  <!-- ============ SHARED: PRIVACY ============ -->
+  <section id="privacy" class="page">
+    <h1>Privacy &amp; sharing</h1>
+    <p class="lede">You decide what is shared and what stays yours.</p>
+
+    <div class="inshort"><b>In short:</b> Answer everything honestly. If there's an answer you'd rather not share, tap <b>Keep private</b> to hide just that one from the copy you share. Nothing leaves this device unless you copy it and send it yourself.</div>
+
+    <div class="card">
+      <h3>Keeping answers private</h3>
+      <p style="margin-bottom:0;">Every question has a <b>Keep private</b> toggle. Tap it on any answer you'd rather not share. You can still answer openly &mdash; private answers stay in your own copy.</p>
+    </div>
+
+    <h2 class="block">Two copies when you finish</h2>
+    <div class="card teal">
+      <h3>Shareable copy</h3>
+      <p style="margin-bottom:0;">Share this with a doctor, a family member, or anyone you choose. Anything you marked private appears only as <b>[Kept private]</b> &mdash; the actual content is removed, so it cannot be read.</p>
+    </div>
+    <div class="card plum">
+      <h3>Your private copy</h3>
+      <p style="margin-bottom:0;">For you only. It includes <b>every</b> answer, including the private ones. Keep it somewhere private, like your Notes app.</p>
+    </div>
+
+    <div class="card">
+      <h3>How the privacy actually works</h3>
+      <p style="margin-bottom:0;">Privacy here means <b>withholding</b>, not secret codes. A private answer is simply left out of the shareable copy &mdash; it is never placed into what you send, so there is nothing for anyone to decode later. In a copy-and-paste setup, this is more honest and dependable than encryption.</p>
+    </div>
+
+    <h2 class="block">Continuing with an AI (optional)</h2>
+    <div class="card plum">
+      <h3>If you're comfortable sharing with an AI</h3>
+      <p>Your private copy is yours to explore. If you feel comfortable putting health details into an AI assistant, you can open a fresh AI chat &mdash; or one of your own Claude Projects &mdash; paste your copy in, and ask your own questions, such as:</p>
+      <div class="ex">"Based on these answers, what should I ask my urologist?"</div>
+      <div class="ex">"In plain language, what might this pattern suggest &mdash; and what does it not prove?"</div>
+      <div class="ex">"Help me turn this into a weekly symptom diary I can update."</div>
+      <p class="note" style="margin:10px 0 0;">Sharing health information with any AI is entirely your choice. Share only what you're comfortable putting into a chat. An AI can help you learn and prepare, but it does not diagnose or treat &mdash; for sensitive or urgent concerns, a clinician is the right place.</p>
+    </div>
+
+    <h2 class="block">Usage notes on this device</h2>
+    <div class="card">
+      <h3>Anonymous usage notes</h3>
+      <p>To help improve this tool, it keeps simple notes about <i>how</i> it's used &mdash; which screens you visit, how far you get, and what device you're on. These notes:</p>
+      <ul class="tips">
+        <li>stay on this device and are <b>never sent anywhere</b>;</li>
+        <li>contain <b>none of your health answers</b> &mdash; only counts, screen names, and device type;</li>
+        <li>don't identify you (no name, location, or tracking ID).</li>
+      </ul>
+      <label class="privtoggle" id="insToggleWrap" style="margin-top:4px;"><input type="checkbox" id="insToggle"><span>Keep usage notes on this device</span></label>
+      <div class="navrow" style="margin-top:6px;">
+        <button type="button" id="insView" class="btn btn-line">See what's stored</button>
+        <button type="button" id="insErase" class="btn btn-reset">Erase usage notes</button>
+      </div>
+      <textarea class="output" id="insOut" readonly style="display:none; min-height:170px; margin-top:10px;"></textarea>
+    </div>
+
+    <button type="button" id="privacyBack" class="btn btn-line">Back</button>
+  </section>
+
+  <!-- ============ DYNAMIC: QUESTIONNAIRE INTRO ============ -->
+  <section id="qintro" class="page">
+    <h1 id="qiTitle"></h1>
+    <p class="lede" id="qiLede"></p>
+
+    <div class="card">
+      <h3>What this is</h3>
+      <p style="margin-bottom:0;" id="qiWhat"></p>
+    </div>
+
+    <h2 class="block">What it's for</h2>
+    <ul class="tips" id="qiFor"></ul>
+
+    <div class="card teal">
+      <h3>Important</h3>
+      <p style="margin-bottom:0;">This is <b>not a diagnosis</b>. IC/BPS is identified by clinicians after other causes (such as infection) are ruled out. This tool organizes information &mdash; it does not replace medical care or testing.</p>
+    </div>
+
+    <div class="howto">
+      <h3>How it works &mdash; step by step</h3>
+      <ol>
+        <li>Answer each question by tapping your choice. The box turns green when it's picked.</li>
+        <li>Would you rather keep an answer to yourself? Tap <b>Keep private</b> on that question.</li>
+        <li>Your answers save on this device automatically &mdash; you can stop and come back any time.</li>
+        <li>When you're done, tap <b>See my results</b> at the bottom.</li>
+        <li>You'll get two copies: one to <b>share</b> (with private answers hidden) and a <b>private</b> one just for you.</li>
+        <li>Copy or send whichever you like &mdash; or simply keep it for your records.</li>
+      </ol>
+      <div class="tip"><b>Tip:</b> To make the words bigger, put two fingers on the screen and gently spread them apart (on a computer, hold <b>Ctrl</b> &mdash; or <b>&#8984;</b> on a Mac &mdash; and press <b>+</b>). To copy your results, tap the <b>Copy</b> button, then paste them into a text, email, or notes.</div>
+    </div>
+
+    <p class="note" id="qiMins"></p>
+
+    <button type="button" id="qiResume" class="btn btn-line" style="display:none;">Continue where you left off</button>
+    <div class="navrow">
+      <button type="button" id="qiPrivacy" class="btn btn-line">How privacy works</button>
+      <button type="button" id="qiStart" class="btn btn-primary grow">Start the questions</button>
+    </div>
+  </section>
+
+  <!-- ============ DYNAMIC: QUESTIONNAIRE FORM + RESULTS ============ -->
+  <section id="page-form" class="page">
+    <h1>The questions</h1>
+    <p class="lede">Tap your answer to each question &mdash; it turns green when picked. Tap <b>Keep private</b> on any question to hide that answer from the copy you share. Everything saves automatically; tap <b>See my results</b> when you're done.</p>
+    <div class="savenote" id="savenote"></div>
+
+    <form id="form" autocomplete="off"></form>
+
+    <button type="button" id="genBtn" class="btn btn-primary">See my results</button>
+    <button type="button" id="genSpec" class="btn btn-plum">Create a research summary</button>
+    <button type="button" id="backToIntro" class="btn btn-line">Back</button>
+    <button type="button" id="resetBtn" class="btn btn-reset">Start over (erase my answers)</button>
+
+    <div id="results">
+      <div class="panel share" id="panelShare" style="display:none;">
+        <h3>Shareable copy</h3>
+        <div class="pnote">Share this with a doctor or anyone you choose. Private answers appear here only as <b>[Kept private]</b>.</div>
+        <textarea class="output" id="outShare" readonly></textarea>
+        <button type="button" class="btn btn-primary" id="copyShare">Copy shareable copy</button>
+        <button type="button" class="btn btn-line" id="msgShare">Open in Messages</button>
+        <div class="flash" id="flashShare"></div>
+      </div>
+
+      <div class="panel personal" id="panelPriv" style="display:none;">
+        <h3>Your private copy</h3>
+        <div class="pnote">For you only &mdash; includes every answer. Keep it somewhere private. You can bring it to a doctor, or continue with it in Claude (a new chat or one of your Projects).</div>
+        <textarea class="output" id="outPriv" readonly></textarea>
+        <button type="button" class="btn btn-plum" id="copyPriv">Copy private copy</button>
+        <button type="button" class="btn btn-primary" id="openClaudePriv">Continue in Claude (copies first)</button>
+        <div class="flash" id="flashPriv"></div>
+      </div>
+
+      <div class="panel research" id="panelSpec" style="display:none;">
+        <h3>Research summary</h3>
+        <div class="pnote">A structured research brief built from your answers. Continue with it in Claude &mdash; a new chat or one of your Projects &mdash; or use it to guide your reading and your questions for a clinician. For learning and preparation; it is not a diagnosis.</div>
+        <textarea class="output" id="outSpec" readonly></textarea>
+        <button type="button" class="btn btn-plum" id="copySpec">Copy research summary</button>
+        <button type="button" class="btn btn-primary" id="openClaudeSpec">Continue in Claude (copies first)</button>
+        <div class="pnote" style="margin:8px 0 0;">Tip: this copies your summary, then shows step-by-step instructions for starting your Claude chat or adding it to a Project.</div>
+        <div class="flash" id="flashSpec"></div>
+      </div>
+
+      <div class="fallback">If a button does not respond, open this page in Safari or Chrome, or press and hold a results box to select all and copy.</div>
+    </div>
+  </section>
+
+  <!-- ============ SHARED: CONTINUE IN CLAUDE ============ -->
+  <section id="claudeguide" class="page">
+    <h1>Continue in Claude</h1>
+    <p class="lede">Your text has been copied to your clipboard. Choose where to continue, then paste it in.</p>
+
+    <div class="card teal">
+      <h3>Start a new chat</h3>
+      <ol class="steps-list">
+        <li>Tap <b>Open a new chat</b> below. If you have the Claude app, it opens; otherwise the website opens.</li>
+        <li>Sign in, or create a free account if you don't have one yet.</li>
+        <li>Tap the message box, then <b>paste</b> (press and hold, then choose Paste).</li>
+        <li><b>Send</b> the message. Claude will use what you pasted to help you.</li>
+      </ol>
+    </div>
+    <button type="button" id="openClaudeNew" class="btn btn-primary">Open a new chat</button>
+
+    <div class="card plum">
+      <h3>Or add it to one of your Projects</h3>
+      <p style="margin-bottom:0;">Projects keep related chats and notes in one place &mdash; handy if you want all your summaries together over time.</p>
+      <ol class="steps-list">
+        <li>Tap <b>Open my Projects</b> below.</li>
+        <li>Open an existing project, or create one (for example, "My bladder health").</li>
+        <li>Start a chat inside the project, tap the message box, and <b>paste</b>.</li>
+        <li><b>Send</b> &mdash; or add it to the project's knowledge so Claude remembers it for future chats.</li>
+      </ol>
+    </div>
+    <button type="button" id="openClaudeProjects" class="btn btn-plum">Open my Projects</button>
+
+    <div class="card">
+      <h3>Don't have the Claude app?</h3>
+      <p class="note" style="margin:0 0 0;">Install it first, then come back here and tap a button above. Your copied text stays on the clipboard.</p>
+      <div class="storebtns">
+        <a class="storebtn" href="https://apps.apple.com/app/claude-by-anthropic/id6473753684" target="_blank" rel="noopener">Get Claude &mdash; App Store (iPhone)</a>
+        <a class="storebtn alt" href="https://play.google.com/store/apps/details?id=com.anthropic.claude" target="_blank" rel="noopener">Get Claude &mdash; Google Play (Android)</a>
+      </div>
+    </div>
+
+    <p class="note">Nothing pastes? Go back, tap the <b>Copy</b> button on the panel, then return and open Claude.</p>
+    <button type="button" id="guideBack" class="btn btn-line">Back to results</button>
+  </section>
+
+</div>
+
+<script>
+/* =====================================================================
+   ADDING A NEW QUESTIONNAIRE (for later):
+   Add an object to QUESTIONNAIRES with:
+     id        unique short id (used for saving), e.g. "nutrition"
+     title     shown on the card and pages
+     short     one-line description on the hub card
+     icon      one of: "drop","leaf","pill","compass" (or add your own in icon())
+     tint/color  badge background + icon color
+     status    "available" or "coming-soon"
+   For an AVAILABLE questionnaire also add:
+     intro     { lede, whatThis, forList:[...], minutes }
+     questions [ ...same shape as the symptoms list below... ]
+     hasSpec   true only if you also write a research-summary builder for it
+   Coming-soon entries need only id/title/short/icon/tint/color/status.
+   ===================================================================== */
+
+var SYMPTOM_QUESTIONS = [
+  {id:1, section:"A. Background", label:"Age", type:"number", min:0, max:120, placeholder:"years"},
+  {id:2, label:"Symptom duration", type:"radio", options:["Less than 6 weeks","6 weeks \u2013 6 months","6 months \u2013 2 years","More than 2 years"]},
+  {id:3, label:"Onset of symptoms", type:"radio", options:["Sudden","Gradual","Unsure"]},
+
+  {id:4, section:"B. Urinary frequency & urgency", label:"Daytime urinations per day", type:"radio", options:["7 or fewer","8 \u2013 10","11 \u2013 15","16 or more"]},
+  {id:5, label:"Times waking to urinate at night", type:"radio", options:["0","1","2","3 or more"]},
+  {id:6, label:"Frequency of sudden, strong urgency", type:"radio", options:["Never","Sometimes","Often","Almost always"]},
+
+  {id:7, section:"C. Pain / pressure", label:"Bladder or pelvic pain or pressure", type:"radio", options:["None","Mild","Moderate","Severe"]},
+  {id:8, label:"Location of pain or pressure (select all that apply)", type:"checkbox", options:["Lower abdomen / bladder","Urethra","Vaginal area","Lower back"], other:true},
+  {id:9, label:"Pain or pressure worsens as the bladder fills", type:"radio", options:["Yes","No","Unsure"]},
+  {id:10, label:"Pain or pressure right after urinating", type:"radio", options:["Relieved","No change","Worse","Unsure"]},
+  {id:11, label:"Worst bladder/pelvic pain in the past month (0 = none, 10 = worst)", type:"select", options:["0","1","2","3","4","5","6","7","8","9","10"]},
+
+  {id:12, section:"D. Pattern & triggers", label:"Symptom pattern", type:"radio", options:["Fairly constant","Flares with symptom-free periods","Mixed"]},
+  {id:13, label:"Food/drink that worsens symptoms (select all that apply)", type:"checkbox", options:["Coffee or tea","Alcohol","Citrus","Tomatoes","Spicy food","Carbonated drinks","Artificial sweeteners","None","Unsure"]},
+  {id:14, label:"Stress worsens symptoms", type:"radio", options:["Yes","No","Unsure"]},
+  {id:15, label:"Symptoms vary with menstrual cycle", type:"radio", options:["Yes","No","Not applicable"]},
+  {id:16, label:"Pain with intercourse or flare afterward", type:"radio", options:["Yes","No","Prefer not to say / N/A"]},
+
+  {id:17, section:"E. Infection history & treatments", label:"Recurrent urinary tract infections", type:"radio", options:["None","A few","Many"]},
+  {id:18, label:"Urine tests negative (no infection found) despite symptoms", type:"radio", options:["Yes, sometimes negative","Always positive for infection","Unsure / not tested"]},
+  {id:19, label:"Response to antibiotics", type:"radio", options:["Reliable relief","Partial or brief relief","No relief","Not tried"]},
+  {id:20, label:"Treatments tried (select all that apply)", type:"checkbox", options:["Dietary changes","Increased fluids","OTC (e.g., phenazopyridine / AZO)","Prescription medication","Pelvic floor physical therapy","Bladder instillations","Supplements","None yet"], other:true},
+  {id:21, label:"Current providers involved (select all that apply)", type:"checkbox", options:["Primary care","Gynecology","Urology","Urogynecology","None yet"], other:true},
+
+  {id:22, section:"F. Impact & additional symptoms", label:"Impact on daily life (sleep, work, mood, social)", type:"radio", options:["Minimal","Some","Significant","Severe"]},
+  {id:23, label:"Additional symptoms present (select all that apply)", type:"checkbox", options:["Visible blood in urine","Fever or chills with symptoms","Unexplained weight loss","Difficulty emptying bladder","None of these"]},
+  {id:24, label:"Additional notes", type:"textarea", placeholder:"Optional"}
+];
+
+var QUESTIONNAIRES = [
+  {
+    id:"symptoms", title:"Symptom Questionnaire",
+    short:"Map your bladder symptoms into one clear picture \u2014 frequency, urgency, pain, triggers, and impact.",
+    icon:"drop", tint:"#eaf5ee", color:"#2f7d57", status:"available", hasSpec:true,
+    intro:{
+      lede:"Map your bladder symptoms into one clear picture.",
+      whatThis:"A self-contained questionnaire that helps put your bladder-related symptoms into one clear picture \u2014 how often you go, urgency, pain or pressure, triggers, infection history, and how symptoms affect daily life.",
+      forList:[
+        "Giving you and your healthcare providers a clear, structured summary.",
+        "Helping you prepare for appointments and remember what to mention.",
+        "Sharing with someone who is helping you \u2014 only the parts you choose.",
+        "Keeping your own complete record over time."
+      ],
+      minutes:"About 5 minutes"
+    },
+    questions: SYMPTOM_QUESTIONS
+  },
+  {
+    id:"nutrition", title:"Nutrition & Triggers",
+    short:"Pinpoint the foods and drinks that set off flares, and build a bladder-friendly eating plan.",
+    icon:"leaf", tint:"#eef6ea", color:"#5a8f3c", status:"coming-soon"
+  },
+  {
+    id:"treatment", title:"Treatment & Options",
+    short:"Organize what you've tried, what helped, and what to discuss next with your care team.",
+    icon:"pill", tint:"#fbeee9", color:"#b35c46", status:"coming-soon"
+  },
+  {
+    id:"coaching", title:"Daily Life & Coaching",
+    short:"Track flares, sleep, habits, and goals over time, with gentle prompts to keep you on course.",
+    icon:"compass", tint:"#eaf1f4", color:"#3f7a8c", status:"coming-soon"
+  }
+];
+
+/* ---- icons (inline SVG, currentColor) ---- */
+function icon(name){
+  var s = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">';
+  var paths = {
+    drop: '<path d="M12 3c0 0-6 6.5-6 11a6 6 0 0 0 12 0c0-4.5-6-11-6-11z"/>',
+    leaf: '<path d="M4 20c8 1 16-5 16-15C11 5 4 11 4 20z"/><path d="M4.5 19.5c3-5 7-8 11-9"/>',
+    pill: '<rect x="3" y="9" width="18" height="6" rx="3"/><path d="M12 9v6"/>',
+    compass: '<circle cx="12" cy="12" r="9"/><path d="M15.5 8.5l-2.2 5.3-5.3 2.2 2.2-5.3z"/>'
+  };
+  return s + (paths[name] || paths.drop) + '</svg>';
+}
+
+var CURRENT = null;
+var STORAGE_PREFIX = "ic_companion_v1_";
+function storageKey(){ return STORAGE_PREFIX + (CURRENT ? CURRENT.id : "none"); }
+function hasSavedData(id){ try { return !!localStorage.getItem(STORAGE_PREFIX + id); } catch(e){ return false; } }
+
+var PRIV_HEADER = "\n\u2014 This is your complete personal copy, including any answers you marked private. It is for you only and is not shared unless you choose to share it. \u2014\n";
+var PRIV_FOOTER = "\n\n\u2014 USING THIS ON YOUR OWN \u2014\n" +
+  "This record is yours. You can keep it, bring it to any doctor, or start your own private research with it. If you are comfortable sharing health details with an AI, open a fresh AI chat (or one of your Claude Projects), paste this in, and ask:\n" +
+  "  \u2022 \"Based on these answers, what questions should I ask my urologist?\"\n" +
+  "  \u2022 \"In plain language, what might this pattern suggest \u2014 and what does it not prove?\"\n" +
+  "  \u2022 \"Help me turn this into a weekly symptom diary I can update.\"\n" +
+  "Store your copy somewhere private, such as your Notes app.\n";
+
+var CLAUDE_NEW = "https://claude.ai/new";
+var CLAUDE_PROJECTS = "https://claude.ai/projects";
+
+/* =====================================================================
+   LOCAL USAGE NOTES (privacy-respecting, on-device only)
+   - Stored in a local database (IndexedDB; falls back to localStorage).
+   - NEVER transmitted anywhere. Contains NO health answers \u2014 only
+     counts, screen names, coarse device info, and timestamps.
+   - The user can view, switch off, or erase it on the Privacy page.
+   ===================================================================== */
+var Insights = (function(){
+  var APP_VERSION = "1.1";
+  var DB_NAME = "ic_companion_insights", EV_STORE = "events";
+  var MK = "ic_companion_insights_meta", LS_EVENTS = "ic_companion_insights_events";
+  var MAX_LS_EVENTS = 400, MAX_VIEW = 25;
+  var db = null, idb = false, sessionStart = 0;
+  var curPage = null, pageT = 0, lastProgT = 0;
+
+  function readMeta(){ try { return JSON.parse(localStorage.getItem(MK) || "{}"); } catch(e){ return {}; } }
+  function writeMeta(m){ try { localStorage.setItem(MK, JSON.stringify(m)); } catch(e){} }
+  function isEnabled(){ return readMeta().enabled !== false; }
+  function setEnabled(on){ var m = readMeta(); m.enabled = !!on; writeMeta(m); }
+
+  function mq(q){ try { return !!(window.matchMedia && window.matchMedia(q).matches); } catch(e){ return null; } }
+  function deviceSnapshot(){
+    var ua = navigator.userAgent || "";
+    var os = /iphone|ipad|ipod/i.test(ua) ? "iOS" : /android/i.test(ua) ? "Android" :
+             /windows/i.test(ua) ? "Windows" : /mac os x/i.test(ua) ? "macOS" :
+             /linux/i.test(ua) ? "Linux" : "Other";
+    var br = /edg\//i.test(ua) ? "Edge" : /(chrome|crios)/i.test(ua) ? "Chrome" :
+             /firefox|fxios/i.test(ua) ? "Firefox" : /safari/i.test(ua) ? "Safari" : "Other";
+    var tz = null; try { tz = Intl.DateTimeFormat().resolvedOptions().timeZone; } catch(e){}
+    return {
+      os: os, browser: br, mobile: /mobi|android|iphone|ipad|ipod/i.test(ua),
+      viewportW: window.innerWidth || null, viewportH: window.innerHeight || null,
+      screenW: (window.screen && screen.width) || null, screenH: (window.screen && screen.height) || null,
+      dpr: window.devicePixelRatio || null,
+      orientation: (window.innerWidth >= window.innerHeight) ? "landscape" : "portrait",
+      touch: mq("(pointer: coarse)"),
+      prefersDark: mq("(prefers-color-scheme: dark)"),
+      prefersReducedMotion: mq("(prefers-reduced-motion: reduce)"),
+      prefersMoreContrast: mq("(prefers-contrast: more)"),
+      installedApp: mq("(display-mode: standalone)") || navigator.standalone === true,
+      language: navigator.language || null, timezone: tz, online: navigator.onLine
+    };
+  }
+
+  function openDB(cb){
+    if (!window.indexedDB){ cb && cb(); return; }
+    var req; try { req = indexedDB.open(DB_NAME, 1); } catch(e){ cb && cb(); return; }
+    req.onupgradeneeded = function(e){ var d = e.target.result; if (!d.objectStoreNames.contains(EV_STORE)) d.createObjectStore(EV_STORE, { keyPath:"id", autoIncrement:true }); };
+    req.onsuccess = function(e){ db = e.target.result; idb = true; cb && cb(); };
+    req.onerror = function(){ cb && cb(); };
+  }
+  function storeEvent(ev){
+    if (idb && db){ try { db.transaction(EV_STORE, "readwrite").objectStore(EV_STORE).add(ev); return; } catch(e){} }
+    try { var arr = JSON.parse(localStorage.getItem(LS_EVENTS) || "[]"); arr.push(ev);
+      if (arr.length > MAX_LS_EVENTS) arr = arr.slice(arr.length - MAX_LS_EVENTS);
+      localStorage.setItem(LS_EVENTS, JSON.stringify(arr)); } catch(e){}
+  }
+  function allEvents(cb){
+    if (idb && db){
+      try { var out = []; var cur = db.transaction(EV_STORE, "readonly").objectStore(EV_STORE).openCursor();
+        cur.onsuccess = function(e){ var c = e.target.result; if (c){ out.push(c.value); c.continue(); } else cb(out); };
+        cur.onerror = function(){ cb([]); }; return;
+      } catch(e){}
+    }
+    try { cb(JSON.parse(localStorage.getItem(LS_EVENTS) || "[]")); } catch(e){ cb([]); }
+  }
+  function bump(m, path){ var o = m.agg = m.agg || {}; for (var i=0;i<path.length-1;i++){ o = o[path[i]] = o[path[i]] || {}; } var k = path[path.length-1]; o[k] = (o[k]||0)+1; }
+
+  function log(type, props){
+    if (!isEnabled()) return; props = props || {};
+    var m = readMeta();
+    switch(type){
+      case "questionnaire_open": if (props.id) bump(m, ["perQ", props.id, "opens"]); break;
+      case "results_generated": if (props.qid){ bump(m, ["perQ", props.qid, "completions"]); m.agg.perQ[props.qid].lastProgress = {answered:props.answered, total:props.total, kept_private:props.kept_private}; } bump(m, ["actions","results"]); break;
+      case "research_summary": bump(m, ["actions","research_summary"]); break;
+      case "copy": bump(m, ["actions","copy_"+(props.which||"x")]); break;
+      case "continue_in_claude": bump(m, ["actions","continue_in_claude"]); break;
+      case "open_claude_target": bump(m, ["actions","claude_"+(props.target||"x")]); break;
+      case "open_messages": bump(m, ["actions","open_messages"]); break;
+      case "reset": bump(m, ["actions","reset"]); break;
+      case "coming_soon_click": if (props.id) bump(m, ["comingSoon", props.id]); break;
+      case "error": bump(m, ["actions","errors"]); break;
+    }
+    writeMeta(m);
+    storeEvent({ t: Date.now(), type: type, props: props });
+  }
+  function progress(pr){
+    if (!isEnabled() || !pr || !pr.qid) return;
+    var now = Date.now(); if (now - lastProgT < 1500) return; lastProgT = now;
+    var m = readMeta(); m.agg = m.agg || {}; m.agg.perQ = m.agg.perQ || {};
+    var q = m.agg.perQ[pr.qid] = m.agg.perQ[pr.qid] || {};
+    q.lastProgress = { answered: pr.answered, total: pr.total, kept_private: pr.kept_private };
+    writeMeta(m);
+  }
+  function page(id){
+    if (!isEnabled()) return; var now = Date.now();
+    if (curPage !== null) storeEvent({ t: now, type:"page_view", props:{ page: curPage, ms: now - pageT } });
+    curPage = id; pageT = now;
+  }
+  function endSession(){
+    if (!isEnabled()) return; var now = Date.now();
+    if (curPage !== null){ storeEvent({ t: now, type:"page_view", props:{ page: curPage, ms: now - pageT } }); curPage = null; }
+    storeEvent({ t: now, type:"session_end", props:{ ms: now - sessionStart } });
+  }
+  function init(){
+    openDB(function(){
+      var m = readMeta();
+      if (!m.firstSeen) m.firstSeen = new Date().toISOString();
+      if (m.enabled === undefined) m.enabled = true;
+      m.sessions = (m.sessions||0) + 1; m.lastSeen = new Date().toISOString();
+      m.appVersion = APP_VERSION; m.device = deviceSnapshot();
+      writeMeta(m); sessionStart = Date.now(); log("session_start", {});
+    });
+    try {
+      window.addEventListener("visibilitychange", function(){ if (document.visibilityState === "hidden") endSession(); });
+      window.addEventListener("pagehide", endSession);
+    } catch(e){}
+  }
+  function fmtDur(ms){ if (ms==null) return "?"; var s=Math.round(ms/1000); if (s<60) return s+"s"; return Math.round(s/60)+"m"; }
+  function summary(cb){
+    var m = readMeta(); var d = m.device || {}; var a = m.agg || {};
+    allEvents(function(events){
+      var L = [];
+      L.push("USAGE NOTES \u2014 stored only on this device, never sent anywhere.");
+      L.push("(Contains no health answers \u2014 only counts, screen names, and device info.)");
+      L.push("");
+      L.push("Recording: " + (m.enabled === false ? "OFF" : "ON") + "    App version: " + (m.appVersion||"?"));
+      L.push("First opened: " + (m.firstSeen||"?"));
+      L.push("Sessions: " + (m.sessions||0) + "    Last seen: " + (m.lastSeen||"?"));
+      L.push("Storage: " + (idb ? "local database (IndexedDB)" : "local storage") + "    Events kept: " + events.length);
+      L.push("");
+      L.push("DEVICE / ENVIRONMENT");
+      L.push("  " + [d.os, d.browser, d.mobile?"mobile":"desktop"].filter(Boolean).join(" \u00b7 "));
+      L.push("  screen " + d.screenW + "\u00d7" + d.screenH + ", viewport " + d.viewportW + "\u00d7" + d.viewportH + ", DPR " + d.dpr + ", " + d.orientation);
+      L.push("  touch:" + d.touch + "  dark:" + d.prefersDark + "  reduced-motion:" + d.prefersReducedMotion + "  more-contrast:" + d.prefersMoreContrast);
+      L.push("  language:" + d.language + "  timezone:" + d.timezone + "  installed-app:" + d.installedApp);
+      L.push("");
+      L.push("QUESTIONNAIRES");
+      var perQ = a.perQ || {}, anyQ = false;
+      for (var qid in perQ){ if (perQ.hasOwnProperty(qid)){ anyQ = true; var q = perQ[qid], lp = q.lastProgress;
+        L.push("  " + qid + ": opened " + (q.opens||0) + ", completed " + (q.completions||0) + (lp ? (", last progress " + lp.answered + "/" + lp.total + " (" + lp.kept_private + " kept private)") : "")); } }
+      if (!anyQ) L.push("  (none yet)");
+      L.push("");
+      L.push("ACTIONS");
+      var act = a.actions || {}, ak = Object.keys(act);
+      L.push("  " + (ak.length ? ak.map(function(k){ return k + ":" + act[k]; }).join("  ") : "(none yet)"));
+      L.push("");
+      L.push("INTEREST IN COMING-SOON DEEP DIVES");
+      var cs = a.comingSoon || {}, ck = Object.keys(cs);
+      L.push("  " + (ck.length ? ck.map(function(k){ return k + ":" + cs[k]; }).join("  ") : "(none yet)"));
+      L.push("");
+      L.push("RECENT EVENTS (last " + MAX_VIEW + ")");
+      var recent = events.slice(-MAX_VIEW);
+      recent.forEach(function(ev){ var p = ev.props || {};
+        var extra = (ev.type==="page_view") ? (" " + p.page + " (" + fmtDur(p.ms) + ")") : (Object.keys(p).length ? " " + JSON.stringify(p) : "");
+        L.push("  " + new Date(ev.t).toLocaleString() + "  " + ev.type + extra); });
+      if (!recent.length) L.push("  (none yet)");
+      cb(L.join("\n"));
+    });
+  }
+  function erase(cb){
+    var enabled = readMeta().enabled;
+    try { localStorage.removeItem(MK); } catch(e){}
+    try { localStorage.removeItem(LS_EVENTS); } catch(e){}
+    function done(){ writeMeta({ enabled: enabled, firstSeen: new Date().toISOString(), sessions: 0, appVersion: APP_VERSION, device: deviceSnapshot() }); curPage = null; cb && cb(); }
+    if (idb && db){ try { var tx = db.transaction(EV_STORE,"readwrite"); tx.objectStore(EV_STORE).clear(); tx.oncomplete = done; tx.onerror = done; return; } catch(e){} }
+    done();
+  }
+  return { init:init, log:log, page:page, progress:progress, isEnabled:isEnabled, setEnabled:setEnabled, summary:summary, erase:erase };
+})();
+
+/* ---------------- hub ---------------- */
+function renderHub(){
+  var c = document.getElementById("cards"); c.innerHTML = "";
+  QUESTIONNAIRES.forEach(function(q){
+    var ready = q.status === "available";
+    var saved = ready && hasSavedData(q.id);
+    var card = document.createElement("div");
+    card.className = "qcard " + (ready ? "ready" : "soon");
+    var pill = ready ? (saved ? '<span class="pill saved">In progress</span>' : '<span class="pill ready">Ready</span>')
+                     : '<span class="pill soon">Coming soon</span>';
+    var btn = ready ? '<button type="button" class="btn btn-primary qc-btn">' + (saved ? "Continue" : "Start") + '</button>'
+                    : '<button type="button" class="btn btn-soft qc-btn" disabled>Coming soon</button>';
+    card.innerHTML =
+      '<div class="badge" style="background:' + q.tint + ';color:' + q.color + '">' + icon(q.icon) + '</div>' +
+      '<div class="qc-body">' +
+        '<div class="qc-top"><h3>' + q.title + '</h3>' + pill + '</div>' +
+        '<p>' + q.short + '</p>' +
+        (ready && q.intro && q.intro.minutes ? '<p class="mins">' + q.intro.minutes + '</p>' : '') +
+        btn +
+      '</div>';
+    if (ready){
+      card.addEventListener("click", function(){ openQuestionnaire(q); });
+    } else {
+      card.addEventListener("click", function(){
+        try { Insights.log("coming_soon_click", { id: q.id }); } catch(e){}
+        showHubNote(q.title + " is on the way. For now, your Symptom Questionnaire is ready to use.");
+      });
+    }
+    c.appendChild(card);
+  });
+}
+function showHubNote(msg){
+  var n = document.getElementById("hubnote");
+  n.textContent = msg; n.style.display = "block";
+}
+
+/* ---------------- open a questionnaire ---------------- */
+function openQuestionnaire(q){
+  CURRENT = q;
+  try { Insights.log("questionnaire_open", { id: q.id }); } catch(e){}
+  document.getElementById("qiTitle").textContent = q.title;
+  document.getElementById("qiLede").textContent = q.intro.lede;
+  document.getElementById("qiWhat").textContent = q.intro.whatThis;
+  var ul = document.getElementById("qiFor"); ul.innerHTML = "";
+  q.intro.forList.forEach(function(t){ var li = document.createElement("li"); li.textContent = t; ul.appendChild(li); });
+  document.getElementById("qiMins").textContent =
+    (q.intro.minutes ? q.intro.minutes + ". " : "") + "Your answers save automatically on this device as you go.";
+  buildForm();
+  resetResultsUI();
+  document.getElementById("genSpec").style.display = q.hasSpec ? "block" : "none";
+  var resumed = loadState();
+  document.getElementById("qiResume").style.display = resumed ? "block" : "none";
+  showPage("qintro");
+}
+
+/* ---------------- build the form ---------------- */
+function buildForm(){
+  var form = document.getElementById("form");
+  form.innerHTML = "";
+  var currentSection = null;
+  CURRENT.questions.forEach(function(q){
+    if (q.section && q.section !== currentSection){
+      currentSection = q.section;
+      var h = document.createElement("h2"); h.className = "section"; h.textContent = q.section; form.appendChild(h);
+    }
+    var wrap = document.createElement("div"); wrap.className = "q"; wrap.id = "wrap_q" + q.id;
+    var lab = document.createElement("div"); lab.className = "qlabel"; lab.textContent = q.id + ". " + q.label; wrap.appendChild(lab);
+
+    var pt = document.createElement("label"); pt.className = "privtoggle";
+    var pin = document.createElement("input"); pin.type = "checkbox"; pin.className = "priv"; pin.setAttribute("data-qid", q.id);
+    var ps = document.createElement("span"); ps.textContent = "Keep private";
+    pt.appendChild(pin); pt.appendChild(ps); wrap.appendChild(pt);
+
+    if (q.type === "radio" || q.type === "checkbox"){
+      q.options.forEach(function(opt, i){
+        var id = "q" + q.id + "_" + i;
+        var l = document.createElement("label"); l.className = "option"; l.setAttribute("for", id);
+        var inp = document.createElement("input"); inp.type = q.type; inp.name = "q" + q.id; inp.id = id; inp.value = opt;
+        var span = document.createElement("span"); span.textContent = opt;
+        l.appendChild(inp); l.appendChild(span); wrap.appendChild(l);
+      });
+      if (q.other){
+        var oin = document.createElement("input"); oin.type = "text"; oin.className = "otherinput"; oin.id = "q" + q.id + "_other"; oin.placeholder = "Other (optional)"; wrap.appendChild(oin);
+      }
+    } else if (q.type === "number"){
+      var ninp = document.createElement("input"); ninp.type = "number"; ninp.id = "q" + q.id; ninp.className = "textinput"; ninp.inputMode = "numeric";
+      if (q.min != null) ninp.min = q.min; if (q.max != null) ninp.max = q.max; if (q.placeholder) ninp.placeholder = q.placeholder; wrap.appendChild(ninp);
+    } else if (q.type === "select"){
+      var sel = document.createElement("select"); sel.id = "q" + q.id; sel.className = "textinput";
+      var def = document.createElement("option"); def.value = ""; def.textContent = "Select\u2026"; sel.appendChild(def);
+      q.options.forEach(function(opt){ var o = document.createElement("option"); o.value = opt; o.textContent = opt; sel.appendChild(o); });
+      wrap.appendChild(sel);
+    } else if (q.type === "textarea"){
+      var ta = document.createElement("textarea"); ta.id = "q" + q.id; ta.className = "textarea"; if (q.placeholder) ta.placeholder = q.placeholder; wrap.appendChild(ta);
+    }
+    form.appendChild(wrap);
+  });
+  refreshStyles();
+}
+
+function refreshStyles(){
+  document.querySelectorAll("label.option").forEach(function(l){ var inp = l.querySelector("input"); if (inp) l.classList.toggle("selected", inp.checked); });
+  document.querySelectorAll(".privtoggle").forEach(function(l){ var inp = l.querySelector("input.priv"); if (inp) l.classList.toggle("on", inp.checked); });
+}
+document.getElementById("form").addEventListener("change", function(){ refreshStyles(); saveState(); });
+document.getElementById("form").addEventListener("input", saveState);
+
+function isPrivate(qid){ var t = document.querySelector('.priv[data-qid="' + qid + '"]'); return t ? t.checked : false; }
+function answerFor(q){
+  if (q.type === "radio"){ var c = document.querySelector('input[name="q' + q.id + '"]:checked'); return c ? c.value : "(no answer)"; }
+  if (q.type === "checkbox"){
+    var cs = Array.prototype.slice.call(document.querySelectorAll('input[name="q' + q.id + '"]:checked')).map(function(x){ return x.value; });
+    if (q.other){ var ot = document.getElementById("q" + q.id + "_other"); if (ot && ot.value.trim()) cs.push("Other: " + ot.value.trim()); }
+    return cs.length ? cs.join(", ") : "(no answer)";
+  }
+  var el = document.getElementById("q" + q.id); return (el && el.value.trim()) ? el.value.trim() : "(no answer)";
+}
+function buildResults(mode){
+  var out = (CURRENT.title.toUpperCase()) + " \u2014 " + (mode === "private" ? "PRIVATE COPY (FOR YOU)" : "SHAREABLE COPY") + "\n";
+  if (mode === "private") out += PRIV_HEADER;
+  var sec = null;
+  CURRENT.questions.forEach(function(q){
+    if (q.section && q.section !== sec){ sec = q.section; out += "\n" + q.section.toUpperCase() + "\n"; }
+    var ans = answerFor(q);
+    if (mode === "share" && isPrivate(q.id)) ans = "[Kept private]";
+    out += q.id + ". " + q.label + ": " + ans + "\n";
+  });
+  if (mode === "private") out += PRIV_FOOTER;
+  return out;
+}
+
+/* ---------------- research summary (symptoms questionnaire) ---------------- */
+function profileText(){
+  var out = ""; var sec = null;
+  CURRENT.questions.forEach(function(q){
+    if (q.section && q.section !== sec){ sec = q.section; out += "\n" + q.section.toUpperCase() + "\n"; }
+    out += q.id + ". " + q.label + ": " + answerFor(q) + "\n";
+  });
+  return out;
+}
+function specNotes(){
+  function rad(id){ var c = document.querySelector('input[name="q' + id + '"]:checked'); return c ? c.value : ""; }
+  function chk(id){ return Array.prototype.slice.call(document.querySelectorAll('input[name="q' + id + '"]:checked')).map(function(x){ return x.value; }); }
+  var notes = [];
+  if (rad(9) === "Yes" && rad(10) === "Relieved")
+    notes.push("Your answers describe pain or pressure that worsens as the bladder fills and eases after urinating. This filling/relief pattern is a hallmark clinicians associate with IC/BPS \u2014 worth raising specifically.");
+  if (rad(18) === "Yes, sometimes negative")
+    notes.push("You noted urine tests that were sometimes negative despite symptoms. \"Symptoms without a provable infection\" is a key feature that separates IC/BPS from recurrent UTIs \u2014 worth discussing.");
+  if (chk(23).indexOf("Visible blood in urine") !== -1)
+    notes.push("You noted visible blood in urine. This is a red flag that should be evaluated promptly, as it can point to other conditions.");
+  if (chk(23).indexOf("Fever or chills with symptoms") !== -1)
+    notes.push("You noted fever or chills with symptoms. Tell a clinician promptly, as this can indicate infection.");
+  if (chk(23).indexOf("Unexplained weight loss") !== -1)
+    notes.push("You noted unexplained weight loss. Mention this to a clinician, as it warrants its own evaluation.");
+  return notes;
+}
+function buildResearchSpec(){
+  var n = specNotes();
+  var s = "";
+  s += "INTERSTITIAL CYSTITIS / BLADDER PAIN SYNDROME (IC/BPS) \u2014 PERSONAL RESEARCH BRIEF\n";
+  s += "Built from your questionnaire answers, to guide your own research and your conversations with clinicians.\n";
+  s += "This is NOT a diagnosis. IC/BPS is confirmed by a clinician after other causes are ruled out.\n";
+  s += "\nMY SYMPTOM PROFILE\n" + profileText();
+  if (n.length){
+    s += "\nPOINTS WORTH EXPLORING (based on your answers)\n";
+    n.forEach(function(x){ s += "  \u2022 " + x + "\n"; });
+  }
+  s += "\nQUESTIONS TO INVESTIGATE\n";
+  s += "  \u2022 Do my symptoms fit the pattern of interstitial cystitis / bladder pain syndrome?\n";
+  s += "  \u2022 What else could explain them, and how are those ruled out?\n";
+  s += "  \u2022 What would the diagnostic process involve for me?\n";
+  s += "\nCONDITIONS A CLINICIAN MAY CONSIDER OR RULE OUT (to discuss, not to self-conclude)\n";
+  s += "  \u2022 Urinary tract infection (recurrent or chronic)\n  \u2022 Overactive bladder\n  \u2022 Bladder or kidney stones\n";
+  s += "  \u2022 Bladder cancer (especially if there is blood in the urine)\n  \u2022 Endometriosis, pelvic floor dysfunction, or vulvodynia\n  \u2022 Sexually transmitted infections\n";
+  s += "\nHOW IC/BPS IS TYPICALLY EVALUATED (to research and ask about)\n";
+  s += "  \u2022 It is a \"diagnosis of exclusion\" \u2014 other causes are ruled out first\n";
+  s += "  \u2022 Urinalysis and urine culture (note if cultures are negative despite symptoms)\n";
+  s += "  \u2022 A symptom and voiding diary; validated questionnaires (e.g., O'Leary-Sant ICSI/ICPI, PUF scale)\n";
+  s += "  \u2022 Possible cystoscopy, sometimes with hydrodistension under anesthesia, looking for Hunner lesions or glomerulations\n";
+  s += "  \u2022 The IC hallmark to note: pain/pressure that worsens as the bladder fills and eases after voiding\n";
+  s += "\nTREATMENT CATEGORIES TO LEARN ABOUT (commonly staged least- to most-invasive)\n";
+  s += "  \u2022 Lifestyle and diet (identifying trigger foods/drinks), stress management\n  \u2022 Pelvic floor physical therapy\n";
+  s += "  \u2022 Oral medications and bladder instillations\n  \u2022 Hydrodistension; injections such as triamcinolone for Hunner lesions\n  \u2022 Neuromodulation and other advanced options\n";
+  s += "\nWHAT TO TRACK (a simple diary)\n  \u2022 Daily: times urinated (day/night), urgency, pain (0-10), fluids, foods, flares, and what helps\n";
+  s += "\nREPUTABLE SOURCES\n";
+  s += "  \u2022 Urology Care Foundation (American Urological Association): urologyhealth.org\n";
+  s += "  \u2022 American Urological Association IC/BPS Guideline (2022): auanet.org\n";
+  s += "  \u2022 NIDDK (National Institute of Diabetes and Digestive and Kidney Diseases): niddk.nih.gov\n";
+  s += "  \u2022 Mayo Clinic, Cleveland Clinic, Johns Hopkins Medicine\n";
+  s += "  \u2022 Interstitial Cystitis Association: ichelp.org\n";
+  s += "\nQUESTIONS FOR MY CLINICIAN\n";
+  s += "  \u2022 Based on my symptoms, is IC/BPS a consideration, and what would confirm or exclude it?\n";
+  s += "  \u2022 What tests do you recommend next?\n";
+  s += "  \u2022 Could my urine cultures be negative while I still have symptoms \u2014 what does that mean?\n";
+  s += "  \u2022 What treatments would you start with, and what is the plan if they don't help?\n";
+  s += "\nREMINDER: This brief organizes information to guide your research and your conversations with professionals. It does not diagnose. Seek medical care, especially for red-flag symptoms like blood in the urine, fever, or inability to urinate.\n";
+  return s;
+}
+
+/* ---------------- copy + Claude hand-off ---------------- */
+function claudeWrap(text){
+  var intro = "Hi Claude \u2014 below are my answers from the \"" + CURRENT.title + "\" in my Interstitial Cystitis Companion. " +
+    "Please help me make sense of them in plain language: explain anything I should understand, point out what's worth raising with my clinician, and help me prepare questions. " +
+    "This is for learning and preparation, not a diagnosis.\n\n";
+  return intro + text;
+}
+function copyValue(val, flashEl){
+  if (navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(val).then(function(){ flash(flashEl, "Copied"); }).catch(function(){ legacyCopyVal(val, flashEl); });
+  } else { legacyCopyVal(val, flashEl); }
+}
+function legacyCopyVal(val, flashEl){
+  var t = document.createElement("textarea"); t.value = val; t.style.position = "fixed"; t.style.opacity = "0";
+  document.body.appendChild(t); t.focus(); t.select(); var ok = false;
+  try { ok = document.execCommand("copy"); } catch(e){ ok = false; }
+  document.body.removeChild(t);
+  if (!ok){ try { Insights.log("error", { where:"clipboard" }); } catch(e){} }
+  flash(flashEl, ok ? "Copied" : "Select the text above and copy");
+}
+function flash(el, msg){ if (!el) return; el.textContent = msg; setTimeout(function(){ el.textContent = ""; }, 2400); }
+
+function openInClaude(text, flashEl){
+  var wrapped = claudeWrap(text);
+  try { Insights.log("continue_in_claude", { qid: CURRENT && CURRENT.id }); } catch(e){}
+  function go(){ showPage("claudeguide"); }
+  if (navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(wrapped).then(go).catch(function(){ legacyCopyVal(wrapped, flashEl); go(); });
+  } else { legacyCopyVal(wrapped, flashEl); go(); }
+}
+
+/* ---------------- results UI ---------------- */
+function resetResultsUI(){
+  document.getElementById("outShare").value = "";
+  document.getElementById("outPriv").value = "";
+  document.getElementById("outSpec").value = "";
+  document.getElementById("panelShare").style.display = "none";
+  document.getElementById("panelPriv").style.display = "none";
+  document.getElementById("panelSpec").style.display = "none";
+  document.getElementById("results").style.display = "none";
+}
+document.getElementById("genBtn").addEventListener("click", function(){
+  document.getElementById("outShare").value = buildResults("share");
+  document.getElementById("outPriv").value = buildResults("private");
+  document.getElementById("panelShare").style.display = "block";
+  document.getElementById("panelPriv").style.display = "block";
+  var r = document.getElementById("results"); r.style.display = "block";
+  try { Insights.log("results_generated", computeProgress()); } catch(e){}
+  try { r.scrollIntoView({ behavior: "smooth" }); } catch(e){}
+});
+document.getElementById("genSpec").addEventListener("click", function(){
+  if (!CURRENT || !CURRENT.hasSpec) return;
+  document.getElementById("outSpec").value = buildResearchSpec();
+  document.getElementById("panelSpec").style.display = "block";
+  document.getElementById("results").style.display = "block";
+  try { Insights.log("research_summary", { qid: CURRENT && CURRENT.id }); } catch(e){}
+  try { document.getElementById("panelSpec").scrollIntoView({ behavior: "smooth" }); } catch(e){}
+});
+document.getElementById("copyShare").addEventListener("click", function(){ try { Insights.log("copy",{which:"share",qid:CURRENT&&CURRENT.id}); } catch(e){} copyValue(document.getElementById("outShare").value, document.getElementById("flashShare")); });
+document.getElementById("copyPriv").addEventListener("click", function(){ try { Insights.log("copy",{which:"private",qid:CURRENT&&CURRENT.id}); } catch(e){} copyValue(document.getElementById("outPriv").value, document.getElementById("flashPriv")); });
+document.getElementById("copySpec").addEventListener("click", function(){ try { Insights.log("copy",{which:"summary",qid:CURRENT&&CURRENT.id}); } catch(e){} copyValue(document.getElementById("outSpec").value, document.getElementById("flashSpec")); });
+document.getElementById("openClaudePriv").addEventListener("click", function(){ openInClaude(document.getElementById("outPriv").value, document.getElementById("flashPriv")); });
+document.getElementById("openClaudeSpec").addEventListener("click", function(){ openInClaude(document.getElementById("outSpec").value, document.getElementById("flashSpec")); });
+document.getElementById("msgShare").addEventListener("click", function(){
+  try { Insights.log("open_messages",{qid:CURRENT&&CURRENT.id}); } catch(e){}
+  var text = document.getElementById("outShare").value || buildResults("share");
+  window.location.href = "sms:&body=" + encodeURIComponent(text);
+});
+document.getElementById("openClaudeNew").addEventListener("click", function(){ try { Insights.log("open_claude_target",{target:"new"}); } catch(e){} try { window.location.href = CLAUDE_NEW; } catch(e){} });
+document.getElementById("openClaudeProjects").addEventListener("click", function(){ try { Insights.log("open_claude_target",{target:"projects"}); } catch(e){} try { window.location.href = CLAUDE_PROJECTS; } catch(e){} });
+
+/* ---------------- save & resume (per questionnaire) ---------------- */
+function collectState(){
+  var s = {};
+  CURRENT.questions.forEach(function(q){
+    var key = "q" + q.id;
+    if (q.type === "radio"){ var c = document.querySelector('input[name="' + key + '"]:checked'); s[key] = c ? c.value : null; }
+    else if (q.type === "checkbox"){
+      s[key] = Array.prototype.slice.call(document.querySelectorAll('input[name="' + key + '"]:checked')).map(function(x){ return x.value; });
+      if (q.other){ var o = document.getElementById(key + "_other"); s[key + "_other"] = o ? o.value : ""; }
+    } else { var el = document.getElementById(key); s[key] = el ? el.value : ""; }
+    s["priv_" + key] = isPrivate(q.id);
+  });
+  return s;
+}
+function applyState(s){
+  CURRENT.questions.forEach(function(q){
+    var key = "q" + q.id;
+    if (q.type === "radio"){ var v = s[key]; if (v != null){ document.querySelectorAll('input[name="' + key + '"]').forEach(function(el){ if (el.value === v) el.checked = true; }); } }
+    else if (q.type === "checkbox"){
+      var arr = s[key] || [];
+      document.querySelectorAll('input[name="' + key + '"]').forEach(function(el){ if (arr.indexOf(el.value) !== -1) el.checked = true; });
+      if (q.other){ var o = document.getElementById(key + "_other"); if (o && s[key + "_other"]) o.value = s[key + "_other"]; }
+    } else { var el = document.getElementById(key); if (el && s[key] != null) el.value = s[key]; }
+    var pt = document.querySelector('.priv[data-qid="' + q.id + '"]'); if (pt && s["priv_" + key]) pt.checked = true;
+  });
+  refreshStyles();
+}
+function computeProgress(){
+  if (!CURRENT) return {};
+  var total = CURRENT.questions.length, answered = 0, priv = 0;
+  CURRENT.questions.forEach(function(q){ if (answerFor(q) !== "(no answer)") answered++; if (isPrivate(q.id)) priv++; });
+  return { qid: CURRENT.id, answered: answered, total: total, kept_private: priv };
+}
+function saveState(){ if (!CURRENT) return; try { localStorage.setItem(storageKey(), JSON.stringify(collectState())); showSaved("\u2713 Saved on this device"); } catch(e){} try { Insights.progress(computeProgress()); } catch(e){} }
+function loadState(){ if (!CURRENT) return false; var raw; try { raw = localStorage.getItem(storageKey()); } catch(e){ return false; } if (!raw) return false; try { applyState(JSON.parse(raw)); return true; } catch(e){ return false; } }
+var saveTimer = null;
+function showSaved(msg){ var n = document.getElementById("savenote"); if (!n) return; n.textContent = msg; clearTimeout(saveTimer); saveTimer = setTimeout(function(){ if (n) n.textContent = ""; }, 2200); }
+
+document.getElementById("resetBtn").addEventListener("click", function(){
+  if (!CURRENT) return;
+  try { Insights.log("reset", { qid: CURRENT.id }); } catch(e){}
+  try { localStorage.removeItem(storageKey()); } catch(e){}
+  document.querySelectorAll("#form input").forEach(function(el){ if (el.type === "radio" || el.type === "checkbox") el.checked = false; else el.value = ""; });
+  document.querySelectorAll("#form select").forEach(function(s){ s.selectedIndex = 0; });
+  document.querySelectorAll("#form textarea").forEach(function(t){ t.value = ""; });
+  refreshStyles();
+  resetResultsUI();
+  document.getElementById("qiResume").style.display = "none";
+  showSaved("Cleared");
+  try { window.scrollTo({ top: 0, behavior: "smooth" }); } catch(e){}
+});
+
+/* ---------------- navigation ---------------- */
+var privacyReturn = "landing";
+function activePageId(){ var p = document.querySelector(".page.active"); return p ? p.id : "landing"; }
+function showPage(id){
+  document.querySelectorAll(".page").forEach(function(p){ p.classList.remove("active"); });
+  var el = document.getElementById(id); if (el) el.classList.add("active");
+
+  var home = document.getElementById("homeLink");
+  var cap = document.getElementById("stepcaption");
+  if (id === "landing"){
+    home.disabled = true; cap.textContent = "";
+    renderHub();
+  } else {
+    home.disabled = false;
+    var caps = {
+      "qintro": (CURRENT ? CURRENT.title + " \u00b7 About this questionnaire" : ""),
+      "page-form": (CURRENT ? CURRENT.title + " \u00b7 The questions" : ""),
+      "privacy": "Privacy & sharing",
+      "claudeguide": "Continue in Claude"
+    };
+    cap.textContent = caps[id] || "";
+  }
+  try { Insights.page(id); } catch(e){}
+  try { window.scrollTo({ top: 0, behavior: "smooth" }); } catch(e){}
+}
+function openPrivacy(){ privacyReturn = activePageId(); showPage("privacy"); }
+
+document.getElementById("homeLink").addEventListener("click", function(){ showPage("landing"); });
+document.getElementById("hubPrivacy").addEventListener("click", function(){ openPrivacy(); });
+document.getElementById("qiPrivacy").addEventListener("click", function(){ openPrivacy(); });
+document.getElementById("privacyBack").addEventListener("click", function(){ showPage(privacyReturn || "landing"); });
+document.getElementById("qiStart").addEventListener("click", function(){ showPage("page-form"); });
+document.getElementById("qiResume").addEventListener("click", function(){ showPage("page-form"); });
+document.getElementById("backToIntro").addEventListener("click", function(){ showPage("qintro"); });
+document.getElementById("guideBack").addEventListener("click", function(){ showPage("page-form"); });
+
+/* ---------------- start ---------------- */
+try { Insights.init(); } catch(e){}
+renderHub();
+showPage("landing");
+
+/* usage-notes controls (Privacy page) */
+(function(){
+  var t = document.getElementById("insToggle"), wrap = document.getElementById("insToggleWrap");
+  if (t){
+    t.checked = Insights.isEnabled();
+    if (wrap) wrap.classList.toggle("on", t.checked);
+    t.addEventListener("change", function(){
+      Insights.setEnabled(t.checked);
+      if (wrap) wrap.classList.toggle("on", t.checked);
+    });
+  }
+  var v = document.getElementById("insView");
+  if (v) v.addEventListener("click", function(){
+    Insights.summary(function(text){ var o = document.getElementById("insOut"); o.value = text; o.style.display = "block"; });
+  });
+  var er = document.getElementById("insErase");
+  if (er) er.addEventListener("click", function(){
+    Insights.erase(function(){ var o = document.getElementById("insOut"); o.value = "Usage notes erased."; o.style.display = "block";
+      setTimeout(function(){ o.value = ""; o.style.display = "none"; }, 1800); });
+  });
+})();
+</script>
+</body>
+</html>
